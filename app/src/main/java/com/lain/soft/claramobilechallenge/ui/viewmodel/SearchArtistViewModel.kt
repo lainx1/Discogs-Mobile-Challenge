@@ -6,12 +6,15 @@ import com.lain.soft.claramobilechallenge.domain.usecase.PopulateLoadingArtistsU
 import com.lain.soft.claramobilechallenge.domain.usecase.SearchArtistUseCase
 import com.lain.soft.claramobilechallenge.domain.usecase.ValidateSearchQueryUseCase
 import com.lain.soft.claramobilechallenge.ui.mapper.ErrorMessageMapper
-import com.lain.soft.claramobilechallenge.ui.state.Event
-import com.lain.soft.claramobilechallenge.ui.state.MainScreenState
-import com.lain.soft.claramobilechallenge.ui.state.ScreenState
+import com.lain.soft.claramobilechallenge.ui.state.SearchArtistScreenEffect
+import com.lain.soft.claramobilechallenge.ui.state.SearchArtistScreenEvent
+import com.lain.soft.claramobilechallenge.ui.state.SearchArtistState
+import com.lain.soft.claramobilechallenge.ui.state.SearchArtistScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,15 +25,18 @@ class SearchArtistViewModel @Inject constructor(
     private val validateSearchQueryUseCase: ValidateSearchQueryUseCase,
     private val searchArtistUseCase: SearchArtistUseCase,
     private val errorMessageMapper: ErrorMessageMapper
-) : StateMachineViewModel<MainScreenState>(
-    initialState = MainScreenState(
+) : StateMachineViewModel<SearchArtistState>(
+    initialState = SearchArtistState(
         query = "",
-        screenState = ScreenState.Idle,
+        state = SearchArtistScreenState.Idle,
         artists = emptyFlow(),
         searchBarEnabled = true,
         resultsContainerAlignment = Alignment.Center
     )
 ) {
+
+    private val _effect = MutableSharedFlow<SearchArtistScreenEffect>()
+    val effect: SharedFlow<SearchArtistScreenEffect> = _effect
 
     init {
         viewModelScope.launch {
@@ -43,10 +49,11 @@ class SearchArtistViewModel @Inject constructor(
 
     private var searchJob: Job? = null
 
-    fun onEvent(event: Event){
+    fun onEvent(event: SearchArtistScreenEvent){
         when (event){
-            is Event.OnQueryChange -> onQueryChange(event.query)
-            is Event.OnListError -> onListError(event.exception)
+            is SearchArtistScreenEvent.OnQueryChange -> onQueryChange(event.query)
+            is SearchArtistScreenEvent.OnListError -> onListError(event.exception)
+            is SearchArtistScreenEvent.OnNavigateToDetail -> onNavigateToDetail(event.id)
         }
     }
 
@@ -61,7 +68,7 @@ class SearchArtistViewModel @Inject constructor(
         setState { current ->
             current.copy(
                 query = "",
-                screenState = ScreenState.Idle,
+                state = SearchArtistScreenState.Idle,
                 resultsContainerAlignment = Alignment.Center
             )
         }
@@ -89,7 +96,7 @@ class SearchArtistViewModel @Inject constructor(
         viewModelScope.launch {
             setState { current ->
                 current.copy(
-                    screenState = ScreenState.Loading,
+                    state = SearchArtistScreenState.Loading,
                     searchBarEnabled = false,
                     resultsContainerAlignment = Alignment.Center
                 )
@@ -98,7 +105,7 @@ class SearchArtistViewModel @Inject constructor(
                 setState { current ->
                     current.copy(
                         artists = it,
-                        screenState = ScreenState.Success,
+                        state = SearchArtistScreenState.Success,
                         searchBarEnabled = true,
                         resultsContainerAlignment = Alignment.TopCenter
                     )
@@ -115,10 +122,16 @@ class SearchArtistViewModel @Inject constructor(
         val errorMessage = errorMessageMapper.map(exception)
         setState { current ->
             current.copy(
-                screenState = ScreenState.Error(errorMessage),
+                state = SearchArtistScreenState.Error(errorMessage),
                 searchBarEnabled = true,
                 resultsContainerAlignment = Alignment.Center
             )
+        }
+    }
+
+    private fun onNavigateToDetail(id: Int){
+        viewModelScope.launch {
+            _effect.emit(SearchArtistScreenEffect.NavigateToDetail(id))
         }
     }
 }

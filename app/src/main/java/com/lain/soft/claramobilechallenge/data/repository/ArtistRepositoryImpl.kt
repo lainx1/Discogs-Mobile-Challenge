@@ -3,9 +3,11 @@ package com.lain.soft.claramobilechallenge.data.repository
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.lain.soft.claramobilechallenge.data.mapper.toDomain
 import com.lain.soft.claramobilechallenge.data.remote.DiscogsApi
 import com.lain.soft.claramobilechallenge.data.remote.paging.SearchArtistPagingSource
 import com.lain.soft.claramobilechallenge.domain.model.Artist
+import com.lain.soft.claramobilechallenge.domain.model.ArtistDetail
 import com.lain.soft.claramobilechallenge.domain.repository.ArtistRepository
 import com.lain.soft.claramobilechallenge.util.Constants
 import kotlinx.coroutines.flow.Flow
@@ -25,4 +27,7 @@ class ArtistRepositoryImpl @Inject constructor(
                 SearchArtistPagingSource(query = query, discogsApi = discogsApi)
             }
         ).flow
+
+    override suspend fun getArtistDetail(artistId: Int): ArtistDetail =
+        discogsApi.getArtistDetail(artistId).toDomain()
 }

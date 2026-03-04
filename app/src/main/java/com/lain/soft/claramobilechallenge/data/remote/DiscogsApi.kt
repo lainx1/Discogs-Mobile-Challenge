@@ -1,9 +1,12 @@
 package com.lain.soft.claramobilechallenge.data.remote
 
+import com.lain.soft.claramobilechallenge.data.remote.dto.artist.ArtistDetailResponseDto
 import com.lain.soft.claramobilechallenge.data.remote.dto.search.SearchArtistsResponseDto
+import com.lain.soft.claramobilechallenge.util.Constants.ARTIST_DETAIL_ENDPOINT
 import com.lain.soft.claramobilechallenge.util.Constants.SEARCH_ENDPOINT
 import com.lain.soft.claramobilechallenge.util.Constants.SEARCH_ENDPOINT_ARTIST_TYPE
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface DiscogsApi {
@@ -14,4 +17,9 @@ interface DiscogsApi {
         @Query("per_page") perPage: Int,
         @Query("page") page: Int
     ) : SearchArtistsResponseDto
+
+    @GET(ARTIST_DETAIL_ENDPOINT)
+    suspend fun getArtistDetail(
+        @Path("artistId") artistId: Int
+    ): ArtistDetailResponseDto
 }

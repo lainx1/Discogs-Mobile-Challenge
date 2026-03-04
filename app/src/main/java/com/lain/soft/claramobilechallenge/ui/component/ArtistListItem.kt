@@ -22,10 +22,12 @@ import com.lain.soft.claramobilechallenge.R
 @Composable
 fun ArtistListItem(
     modifier: Modifier = Modifier,
+    imageModifier: Modifier = Modifier,
+    nameModifier: Modifier = Modifier,
     isLoading: Boolean = false,
     id: Int,
     name: String,
-    thumbnail: String,
+    thumbnail: String?,
     onClick: (id: Int) -> Unit
 ) {
     Surface(
@@ -48,8 +50,10 @@ fun ArtistListItem(
                 shape = RoundedCornerShape(12.dp),
             ) {
                 AsyncImage(
-                    modifier = Modifier.height(150.dp).fillMaxWidth(),
-                    model = thumbnail.ifEmpty { null },
+                    modifier = imageModifier
+                        .height(150.dp)
+                        .fillMaxWidth(),
+                    model = thumbnail,
                     contentDescription = name,
                     contentScale = ContentScale.Crop,
                     placeholder = painterResource(R.drawable.artist_placeholder),
@@ -59,7 +63,9 @@ fun ArtistListItem(
             }
             Spacer(modifier = Modifier.height(5.dp))
             Text(
-                modifier = Modifier.fillMaxWidth().shimmer(cornerRadius = 8.dp, isLoading = isLoading),
+                modifier = nameModifier
+                    .fillMaxWidth()
+                    .shimmer(cornerRadius = 8.dp, isLoading = isLoading),
                 text = name,
                 maxLines = 2,
                 minLines = 2,

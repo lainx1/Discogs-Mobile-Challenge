@@ -7,6 +7,7 @@ object Constants {
     const val DISCOGS_API_BASE_URL = BuildConfig.DISCOGS_API_BASE_URL
     const val DISCOGS_API_KEY = BuildConfig.DISCOGS_API_KEY
     const val SEARCH_ENDPOINT = "/database/search"
+    const val ARTIST_DETAIL_ENDPOINT = "/artists/{artistId}"
     const val SEARCH_ENDPOINT_ITEMS_PER_PAGE = 30
     const val SEARCH_ENDPOINT_FIRST_LOAD_SIZE = SEARCH_ENDPOINT_ITEMS_PER_PAGE * 2
     const val SEARCH_ENDPOINT_START_PAGE = 1

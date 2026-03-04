@@ -1,19 +1,37 @@
 <resources>
     <string name="app_name">Clara Mobile Challenge</string>
-    <string name="app_generic_unknown_error_text">Error desconocido</string>
-    <string name="main_screen_idle_state_text">Ingresa un artista para buscar</string>
-    <string name="main_screen_empty_state_text">Tu busqueda no produjo resultados</string>
-    <string name="search_bar_placeholder">Buscar</string>
+    <string name="app_generic_unknown_error_text">Unknown error</string>
+    <string name="main_screen_idle_state_text">Enter an artist to search</string>
+    <string name="main_screen_empty_state_text">Your search returned no results</string>
+    <string name="search_bar_placeholder">Search</string>
 
     <!-- Error Dialog -->
-    <string name="error_dialog_confirmation_text">Aceptar</string>
+    <string name="error_dialog_confirmation_text">Accept</string>
 
     <!-- Network Error Messages -->
-    <string name="error_no_internet">No hay conexión a internet.</string>
-    <string name="error_bad_request">Solicitud incorrecta. Inténtalo de nuevo.</string>
-    <string name="error_unauthorized">No tienes autorización para realizar esta acción.</string>
-    <string name="error_forbidden">Acceso denegado.</string>
-    <string name="error_not_found">Recurso no encontrado.</string>
-    <string name="error_server">Error en el servidor. Por favor, intenta más tarde.</string>
-    <string name="error_timeout">Se agotó el tiempo de espera. Inténtalo de nuevo.</string>
+    <string name="error_no_internet">No internet connection.</string>
+    <string name="error_bad_request">Bad request. Please try again.</string>
+    <string name="error_unauthorized">You are not authorized to perform this action.</string>
+    <string name="error_forbidden">Access denied.</string>
+    <string name="error_not_found">Resource not found.</string>
+    <string name="error_server">Server error. Please try again later.</string>
+    <string name="error_timeout">The request timed out. Please try again.</string>
+
+    <!-- Artist Detail -->
+    <string name="artist_detail_screen_title">Artist Details</string>
+    <string name="artist_detail_back_button">Back</string>
+    <string name="artist_detail_retry_button">Retry</string>
+    <string name="artist_detail_open_releases_button">View albums/releases</string>
+    <string name="artist_detail_biography_title">Biography</string>
+    <string name="artist_detail_real_name_title">Real name</string>
+    <string name="artist_detail_urls_title">URLs</string>
+    <string name="artist_detail_name_variations_title">Name variations</string>
+    <string name="artist_detail_aliases_title">Aliases</string>
+    <string name="artist_detail_groups_title">Groups</string>
+    <string name="artist_detail_members_title">Members</string>
+    <string name="artist_detail_missing_value">No information available</string>
+
+    <!-- Artist Releases -->
+    <string name="artist_releases_screen_title">Albums/Releases</string>
+    <string name="artist_releases_placeholder_text">Albums/releases screen for artist #%1$d (pending for next step).</string>
 </resources>
