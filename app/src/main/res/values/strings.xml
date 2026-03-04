@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">Clara Mobile Challenge</string>
+    <string name="app_generic_unknown_error_text">Error desconocido</string>
+    <string name="main_screen_idle_state_text">Ingresa un artista para buscar</string>
+    <string name="main_screen_empty_state_text">Tu busqueda no produjo resultados</string>
+    <string name="search_bar_placeholder">Buscar</string>
+
+    <!-- Error Dialog -->
+    <string name="error_dialog_confirmation_text">Aceptar</string>
+
+    <!-- Network Error Messages -->
+    <string name="error_no_internet">No hay conexión a internet.</string>
+    <string name="error_bad_request">Solicitud incorrecta. Inténtalo de nuevo.</string>
+    <string name="error_unauthorized">No tienes autorización para realizar esta acción.</string>
+    <string name="error_forbidden">Acceso denegado.</string>
+    <string name="error_not_found">Recurso no encontrado.</string>
+    <string name="error_server">Error en el servidor. Por favor, intenta más tarde.</string>
+    <string name="error_timeout">Se agotó el tiempo de espera. Inténtalo de nuevo.</string>
 </resources>
