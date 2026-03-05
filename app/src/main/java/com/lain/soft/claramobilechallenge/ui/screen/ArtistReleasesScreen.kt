@@ -77,7 +77,9 @@ fun ArtistReleasesScreen(
         topBar = {
             AppTopBar(
                 title = stringResource(R.string.artist_releases_screen_title),
-                onBack = onBack
+                onBack = {
+                    viewModel.onEvent(ArtistReleasesEvent.OnNavigateBack)
+                }
             )
         }
     ) { paddingValues ->
@@ -353,7 +355,7 @@ private fun HandleNavigationEffect(
     LaunchedEffect(viewModel.effect) {
         viewModel.effect.collect {
             when(it){
-                ArtistReleasesScreenEffect.NavigateBack -> onBack
+                ArtistReleasesScreenEffect.NavigateBack -> onBack()
             }
         }
     }
