@@ -23,14 +23,12 @@ fun AppNavHost() {
             startDestination = Routes.SEARCH_ARTIST_ROUTE
         ) {
             composable(Routes.SEARCH_ARTIST_ROUTE) {
-                with(this@SharedTransitionLayout) {
-                    SearchArtistScreen(
-                        animatedVisibilityScope = this@composable,
-                        onArtistClick = {
-                            navController.navigate(Routes.artistDetail(it))
-                        }
-                    )
-                }
+                SearchArtistScreen(
+                    animatedVisibilityScope = this@composable,
+                    onArtistClick = {
+                        navController.navigate(Routes.artistDetail(it))
+                    }
+                )
             }
 
             composable(
@@ -39,28 +37,23 @@ fun AppNavHost() {
                     navArgument(Routes.ARTIST_ID) { type = NavType.IntType }
                 )
             ) {
-                with(this@SharedTransitionLayout) {
-                    ArtistDetailScreen(
-                        animatedVisibilityScope = this@composable,
-                        onBack = navController::navigateUp,
-                        onOpenReleases = {
-                            navController.navigate(Routes.artistReleases(it))
-                        }
-                    )
-                }
+                ArtistDetailScreen(
+                    animatedVisibilityScope = this@composable,
+                    onBack = navController::navigateUp,
+                    onOpenReleases = { artistId, artistName ->
+                        navController.navigate(Routes.artistReleases(artistId, artistName))
+                    }
+                )
             }
 
             composable(
                 route = Routes.ARTIST_RELEASES_ROUTE,
                 arguments = listOf(
-                    navArgument(Routes.ARTIST_ID) { type = NavType.IntType }
+                    navArgument(Routes.ARTIST_ID) { type = NavType.IntType },
+                    navArgument(Routes.ARTIST_NAME) { type = NavType.StringType }
                 )
-            ) { backStackEntry ->
-                val artistId = checkNotNull(
-                    backStackEntry.arguments?.getInt(Routes.ARTIST_ID)
-                )
+            ) {
                 ArtistReleasesScreen(
-                    artistId = artistId,
                     onBack = navController::navigateUp
                 )
             }

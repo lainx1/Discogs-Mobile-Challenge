@@ -18,17 +18,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -47,6 +43,7 @@ import com.lain.soft.claramobilechallenge.R
 import com.lain.soft.claramobilechallenge.domain.model.ArtistDetail
 import com.lain.soft.claramobilechallenge.ui.component.AlertDialog
 import com.lain.soft.claramobilechallenge.ui.component.ArtistReferenceCard
+import com.lain.soft.claramobilechallenge.ui.component.AppTopBar
 import com.lain.soft.claramobilechallenge.ui.state.ArtistDetailEvent
 import com.lain.soft.claramobilechallenge.ui.state.ArtistDetailScreenEffect
 import com.lain.soft.claramobilechallenge.ui.state.ArtistDetailScreenState.Error
@@ -60,26 +57,23 @@ fun SharedTransitionScope.ArtistDetailScreen(
     modifier: Modifier = Modifier,
     animatedVisibilityScope: AnimatedVisibilityScope,
     onBack: () -> Unit,
-    onOpenReleases: (Int) -> Unit,
+    onOpenReleases: (Int, String) -> Unit,
     viewModel: ArtistDetailViewModel = hiltViewModel()
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle().value
-    HandleNavigationEffect(viewModel, onBack)
+    HandleNavigationEffect(viewModel, onBack, onOpenReleases)
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(R.string.artist_detail_screen_title)) },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        viewModel.onEvent(ArtistDetailEvent.OnNavigateBack)
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.artist_detail_back_button)
-                        )
-                    }
-                }
+            AppTopBar(
+                title = stringResource(R.string.artist_detail_screen_title),
+                onBack = { viewModel.onEvent(ArtistDetailEvent.OnNavigateBack) },
+                modifier = Modifier.sharedBounds(
+                    sharedContentState = rememberSharedContentState(
+                        key = "artist_shared_topbar"
+                    ),
+                    animatedVisibilityScope = animatedVisibilityScope
+                )
             )
         }
     ) { paddingValues ->
@@ -95,7 +89,9 @@ fun SharedTransitionScope.ArtistDetailScreen(
                         artist = it,
                         animatedVisibilityScope = animatedVisibilityScope,
                         modifier = Modifier.padding(paddingValues),
-                        onOpenReleases = onOpenReleases
+                        onOpenReleases = { id, name ->
+                            viewModel.onEvent(ArtistDetailEvent.OnOpenReleases(id, name))
+                        }
                     )
                 }
             }
@@ -139,7 +135,7 @@ private fun ArtistDetailErrorContent(
         AlertDialog(
             onDismissRequest = onRetry,
             text = screenState.message.asString(),
-            confirmationText = stringResource(R.string.artist_detail_retry_button),
+            confirmationText = stringResource(R.string.alert_dialog_retry_text),
             icon = Icons.Filled.Error
         )
     }
@@ -150,7 +146,7 @@ private fun SharedTransitionScope.ArtistDetailSuccessContent(
     artist: ArtistDetail,
     animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier,
-    onOpenReleases: (Int) -> Unit
+    onOpenReleases: (Int, String) -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
     LazyColumn(
@@ -200,7 +196,7 @@ private fun SharedTransitionScope.ArtistDetailSuccessContent(
         item {
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = { onOpenReleases(artist.id) }
+                onClick = { onOpenReleases(artist.id, artist.name) }
             ) {
                 Text(text = stringResource(R.string.artist_detail_open_releases_button))
             }
@@ -324,11 +320,13 @@ private fun SharedTransitionScope.ArtistDetailSuccessContent(
 private fun HandleNavigationEffect(
     viewModel: ArtistDetailViewModel,
     onBack: () -> Unit,
+    onOpenReleases: (Int, String) -> Unit
 ){
     LaunchedEffect(viewModel.effect) {
         viewModel.effect.collect {
             when(it){
                 ArtistDetailScreenEffect.NavigateBack -> onBack()
+                is ArtistDetailScreenEffect.OpenReleases -> onOpenReleases(it.id, it.name)
             }
         }
     }

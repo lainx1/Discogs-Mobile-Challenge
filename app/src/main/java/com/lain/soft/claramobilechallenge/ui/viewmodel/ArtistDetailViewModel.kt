@@ -40,6 +40,7 @@ class ArtistDetailViewModel @Inject constructor(
         when (event) {
             ArtistDetailEvent.Retry -> loadArtistDetail()
             ArtistDetailEvent.OnNavigateBack -> onNavigateBack()
+            is ArtistDetailEvent.OnOpenReleases -> onOpenReleases(event.id, event.name)
         }
     }
 
@@ -72,6 +73,12 @@ class ArtistDetailViewModel @Inject constructor(
     private fun onNavigateBack() {
         viewModelScope.launch {
             _effect.emit(ArtistDetailScreenEffect.NavigateBack)
+        }
+    }
+
+    private fun onOpenReleases(id: Int, name: String) {
+        viewModelScope.launch {
+            _effect.emit(ArtistDetailScreenEffect.OpenReleases(id, name))
         }
     }
 }

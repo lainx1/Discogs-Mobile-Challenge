@@ -137,7 +137,7 @@ fun SharedTransitionScope.SearchArtistScreen(
                         AlertDialog(
                             onDismissRequest = { viewModel.onEvent(SearchArtistScreenEvent.OnQueryChange("")) },
                             text = state.state.message.asString(),
-                            confirmationText = stringResource(R.string.error_dialog_confirmation_text),
+                            confirmationText = stringResource(R.string.alert_dialog_confirmation_text),
                             icon = Icons.Filled.Error
                         )
                     }

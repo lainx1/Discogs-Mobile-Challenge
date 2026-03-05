@@ -17,8 +17,10 @@ sealed class ArtistDetailScreenState {
 sealed class ArtistDetailEvent {
     data object Retry : ArtistDetailEvent()
     data object OnNavigateBack : ArtistDetailEvent()
+    data class OnOpenReleases(val id: Int, val name: String) : ArtistDetailEvent()
 }
 
 sealed class ArtistDetailScreenEffect {
     data object NavigateBack : ArtistDetailScreenEffect()
+    data class OpenReleases(val id: Int, val name: String) : ArtistDetailScreenEffect()
 }

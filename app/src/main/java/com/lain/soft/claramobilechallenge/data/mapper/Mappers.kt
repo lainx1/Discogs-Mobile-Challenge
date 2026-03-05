@@ -5,14 +5,13 @@ import com.lain.soft.claramobilechallenge.data.remote.dto.artist.ArtistGroupDto
 import com.lain.soft.claramobilechallenge.data.remote.dto.artist.ArtistMemberDto
 import com.lain.soft.claramobilechallenge.data.remote.dto.artist.ArtistAliasDto
 import com.lain.soft.claramobilechallenge.data.remote.dto.search.ResultDto
+import com.lain.soft.claramobilechallenge.data.remote.dto.search.ReleaseSearchResultDto
 import com.lain.soft.claramobilechallenge.domain.model.Artist
 import com.lain.soft.claramobilechallenge.domain.model.ArtistDetail
 import com.lain.soft.claramobilechallenge.domain.model.ArtistMember
+import com.lain.soft.claramobilechallenge.domain.model.ArtistRelease
 import com.lain.soft.claramobilechallenge.domain.model.Alias
 import com.lain.soft.claramobilechallenge.domain.model.Group
-
-private val TAG_REGEX = Regex("\\[[^\\]]*]")
-private val WHITESPACE_REGEX = Regex("\\s+")
 
 fun ResultDto.toDomain(): Artist =
     Artist(
@@ -25,7 +24,7 @@ fun ArtistDetailResponseDto.toDomain(): ArtistDetail =
     ArtistDetail(
         id = id,
         name = name,
-        biographySummary = profile.toBiographySummary(),
+        biographySummary = profile,
         realName = realName?.takeIf { it.isNotBlank() },
         urls = urls.orEmpty()
             .map(String::trim)
@@ -86,11 +85,48 @@ private fun ArtistGroupDto.toDomainOrNull(): Group? {
     )
 }
 
+fun ReleaseSearchResultDto.toDomain(): ArtistRelease {
+    val safeTitle = title?.trim()?.takeIf { it.isNotBlank() }
+    val safeType = type?.trim()?.takeIf { it.isNotBlank() }
+    val safeFormat = format.orEmpty()
+        .map(String::trim)
+        .filter { it.isNotBlank() }
+        .takeIf { it.isNotEmpty() }
+        ?.joinToString(", ")
+    val safeLabels = label.orEmpty()
+        .map(String::trim)
+        .filter { it.isNotBlank() }
+        .distinct()
+        .joinToString(", ")
+    val safeGenres = genre.orEmpty()
+        .map(String::trim)
+        .filter { it.isNotBlank() }
+        .distinct()
+        .joinToString(", ")
+    val safeYear = year?.trim()?.toIntOrNull()
+    val keyValue = buildString {
+        append(id ?: -1)
+        append("_")
+        append(safeTitle ?: "untitled")
+        append("_")
+        append(safeYear ?: -1)
+    }
 
-private fun String?.toBiographySummary(): String {
-    if (this.isNullOrBlank()) return ""
-    return this
-        .replace(TAG_REGEX, "")
-        .replace(WHITESPACE_REGEX, " ")
-        .trim()
+    val safeThumb = thumb
+        ?.trim()
+        ?.takeIf { value ->
+            value.isNotBlank() && value.contains("spacer.gif").not()
+        }
+
+    return ArtistRelease(
+        key = keyValue,
+        id = id,
+        title = safeTitle,
+        year = safeYear,
+        type = safeType,
+        format = safeFormat,
+        thumb = safeThumb,
+        genres = safeGenres,
+        labels = safeLabels
+    )
 }

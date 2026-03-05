@@ -12,7 +12,7 @@ class ErrorMessageMapper @Inject constructor() {
         return when (throwable) {
             is NetworkException -> mapNetworkError(throwable.networkErrorType)
             is AppException -> mapAppErrors(throwable)
-            else -> UiText.StringResource(R.string.app_generic_unknown_error_text)
+            else -> UiText.StringResource(R.string.app_generic_unknown_error)
         }
     }
 
@@ -25,13 +25,13 @@ class ErrorMessageMapper @Inject constructor() {
             NetworkErrorType.Forbidden -> UiText.StringResource(R.string.error_forbidden)
             NetworkErrorType.NotFound -> UiText.StringResource(R.string.error_not_found)
             NetworkErrorType.ServerError -> UiText.StringResource(R.string.error_server)
-            NetworkErrorType.Unknown -> UiText.StringResource(R.string.app_generic_unknown_error_text)
+            NetworkErrorType.Unknown -> UiText.StringResource(R.string.app_generic_unknown_error)
         }
     }
 
     private fun mapAppErrors(appException: AppException): UiText {
         return when (appException) {
-            else -> UiText.StringResource(R.string.app_generic_unknown_error_text)
+            else -> UiText.StringResource(R.string.app_generic_unknown_error)
         }
     }
 }

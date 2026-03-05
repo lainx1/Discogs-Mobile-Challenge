@@ -1,4 +1,4 @@
-package com.lain.soft.claramobilechallenge.data.remote.dto.search
+package com.lain.soft.claramobilechallenge.data.remote.dto.pagination
 
 data class UrlsDto(
     val next: String ?= null,
