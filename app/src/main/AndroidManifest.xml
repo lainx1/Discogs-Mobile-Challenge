@@ -18,7 +18,7 @@
             android:name=".ui.activity.MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.ClaraMobileChallenge">
+            android:theme="@style/Theme.ClaraMobileChallenge.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

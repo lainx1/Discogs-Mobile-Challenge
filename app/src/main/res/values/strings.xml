@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Clara Mobile Challenge</string>
+    <string name="app_name">Discogs Mobile Challenge</string>
     <string name="app_generic_unknown_error">Unknown error</string>
     <string name="main_screen_idle_state_text">Enter an artist to search</string>
     <string name="main_screen_empty_state_text">Your search returned no results</string>
