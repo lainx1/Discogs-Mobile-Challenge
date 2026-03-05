@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -36,8 +37,8 @@ fun ArtistListItem(
         onClick = {
             onClick(id)
         },
-        color = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
+        shape = RoundedCornerShape(12.dp)
     ) {
         Column{
             Surface(
@@ -47,7 +48,7 @@ fun ArtistListItem(
                         isLoading = isLoading,
                         cornerRadius = 12.dp
                     ),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(12.dp)
             ) {
                 AsyncImage(
                     modifier = imageModifier
@@ -64,11 +65,11 @@ fun ArtistListItem(
             Spacer(modifier = Modifier.height(5.dp))
             Text(
                 modifier = nameModifier
+                    .padding(horizontal = 4.dp)
                     .fillMaxWidth()
                     .shimmer(cornerRadius = 8.dp, isLoading = isLoading),
                 text = name,
-                maxLines = 2,
-                minLines = 2,
+                maxLines = 1,
                 style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.SemiBold,
                 overflow = TextOverflow.Ellipsis,

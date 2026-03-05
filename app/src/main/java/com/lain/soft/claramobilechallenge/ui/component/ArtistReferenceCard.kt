@@ -2,6 +2,7 @@ package com.lain.soft.claramobilechallenge.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.lain.soft.claramobilechallenge.R
@@ -56,7 +58,8 @@ fun ArtistReferenceCard(
             Text(
                 text = name,
                 style = MaterialTheme.typography.bodyMedium,
-                maxLines = 2
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }
