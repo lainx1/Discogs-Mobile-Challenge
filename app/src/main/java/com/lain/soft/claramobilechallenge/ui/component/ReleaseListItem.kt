@@ -51,52 +51,81 @@ fun ReleaseListItem(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.Top
         ) {
-            AsyncImage(
-                modifier = Modifier
-                    .size(84.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                model = thumbnail?.takeIf { it.isNotBlank() },
-                contentDescription = title,
-                contentScale = ContentScale.Crop,
-                placeholder = painterResource(R.drawable.artist_placeholder),
-                error = painterResource(R.drawable.artist_placeholder),
-                fallback = painterResource(R.drawable.artist_placeholder)
+            ReleaseThumbnail(
+                thumbnail = thumbnail,
+                title = title
             )
-
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = "$year  •  $formatOrType",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = genres,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = labels,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+            ReleaseMetadata(
+                modifier = Modifier.weight(1f),
+                title = title,
+                year = year,
+                formatOrType = formatOrType,
+                genres = genres,
+                labels = labels
+            )
         }
+    }
+}
+
+@Composable
+private fun ReleaseThumbnail(
+    thumbnail: String?,
+    title: String
+) {
+    AsyncImage(
+        modifier = Modifier
+            .size(84.dp)
+            .clip(RoundedCornerShape(12.dp)),
+        model = thumbnail?.takeIf { it.isNotBlank() },
+        contentDescription = title,
+        contentScale = ContentScale.Crop,
+        placeholder = painterResource(R.drawable.artist_placeholder),
+        error = painterResource(R.drawable.artist_placeholder),
+        fallback = painterResource(R.drawable.artist_placeholder)
+    )
+}
+
+@Composable
+private fun ReleaseMetadata(
+    modifier: Modifier = Modifier,
+    title: String,
+    year: String,
+    formatOrType: String,
+    genres: String,
+    labels: String
+) {
+    Column(
+        modifier = modifier
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = "$year  •  $formatOrType",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = genres,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            text = labels,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }

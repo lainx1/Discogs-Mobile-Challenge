@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -155,163 +156,164 @@ private fun SharedTransitionScope.ArtistDetailSuccessContent(
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        item {
-            Spacer(modifier = Modifier.height(8.dp))
-        }
+        artistHeaderSection(
+            scope = this@ArtistDetailSuccessContent,
+            artist = artist,
+            animatedVisibilityScope = animatedVisibilityScope
+        )
+        artistMainInfoSection(artist, onOpenReleases)
+        artistUrlSection(artist.urls, uriHandler::openUri)
+        artistNameVariationsSection(artist)
+        artistReferenceRowSection(
+            titleRes = R.string.artist_detail_aliases_title,
+            references = artist.aliases.map { "${it.id}_${it.name}" to (it.name to it.thumbnailUrl) }
+        )
+        artistReferenceRowSection(
+            titleRes = R.string.artist_detail_groups_title,
+            references = artist.groups.map { "${it.id}_${it.name}" to (it.name to it.thumbnailUrl) }
+        )
+        artistReferenceRowSection(
+            titleRes = R.string.artist_detail_members_title,
+            references = artist.members.map { "${it.id}_${it.name}" to (it.name to it.thumbnailUrl) }
+        )
+        item { Spacer(modifier = Modifier.height(20.dp)) }
+    }
+}
 
-        item {
-            AsyncImage(
-                modifier = Modifier
-                    .sharedElement(
-                        sharedContentState = rememberSharedContentState(
-                            key = "artist_image_${artist.id}"
-                        ),
-                        animatedVisibilityScope = animatedVisibilityScope
-                    )
-                    .fillMaxWidth()
-                    .height(250.dp),
-                model = artist.imageUrl,
-                contentDescription = artist.name,
-                contentScale = ContentScale.Crop,
-                placeholder = painterResource(R.drawable.artist_placeholder),
-                error = painterResource(R.drawable.artist_placeholder),
-                fallback = painterResource(R.drawable.artist_placeholder)
-            )
-        }
-
-        item {
-            Text(
-                modifier = Modifier.sharedElement(
+private fun LazyListScope.artistHeaderSection(
+    scope: SharedTransitionScope,
+    artist: ArtistDetail,
+    animatedVisibilityScope: AnimatedVisibilityScope
+) {
+    item { Spacer(modifier = Modifier.height(8.dp)) }
+    item {
+        AsyncImage(
+            modifier = Modifier
+                .run {
+                    with(scope) {
+                        sharedElement(
+                            sharedContentState = rememberSharedContentState(
+                                key = "artist_image_${artist.id}"
+                            ),
+                            animatedVisibilityScope = animatedVisibilityScope
+                        )
+                    }
+                }
+                .fillMaxWidth()
+                .height(250.dp),
+            model = artist.imageUrl,
+            contentDescription = artist.name,
+            contentScale = ContentScale.Crop,
+            placeholder = painterResource(R.drawable.artist_placeholder),
+            error = painterResource(R.drawable.artist_placeholder),
+            fallback = painterResource(R.drawable.artist_placeholder)
+        )
+    }
+    item {
+        Text(
+            modifier = with(scope) {
+                Modifier.sharedElement(
                     sharedContentState = rememberSharedContentState(
                         key = "artist_name_${artist.id}"
                     ),
                     animatedVisibilityScope = animatedVisibilityScope
-                ),
-                text = artist.name,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-        }
+                )
+            },
+            text = artist.name,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
 
-        item {
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = { onOpenReleases(artist.id, artist.name) }
-            ) {
-                Text(text = stringResource(R.string.artist_detail_open_releases_button))
+private fun LazyListScope.artistMainInfoSection(
+    artist: ArtistDetail,
+    onOpenReleases: (Int, String) -> Unit
+) {
+    item {
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { onOpenReleases(artist.id, artist.name) }
+        ) {
+            Text(text = stringResource(R.string.artist_detail_open_releases_button))
+        }
+    }
+    item {
+        ArtistInfoCard(
+            title = stringResource(R.string.artist_detail_biography_title),
+            value = artist.biographySummary.ifBlank {
+                stringResource(R.string.artist_detail_missing_value)
             }
-        }
-
+        )
+    }
+    if (!artist.realName.isNullOrBlank()) {
         item {
             ArtistInfoCard(
-                title = stringResource(R.string.artist_detail_biography_title),
-                value = artist.biographySummary.ifBlank {
-                    stringResource(R.string.artist_detail_missing_value)
-                }
+                title = stringResource(R.string.artist_detail_real_name_title),
+                value = artist.realName
             )
         }
+    }
+}
 
-        if (artist.realName.isNullOrBlank().not()) {
-            item {
-                ArtistInfoCard(
-                    title = stringResource(R.string.artist_detail_real_name_title),
-                    value = artist.realName
-                )
-            }
-        }
+private fun LazyListScope.artistUrlSection(
+    urls: List<String>,
+    onOpenUrl: (String) -> Unit
+) {
+    if (urls.isEmpty()) return
+    item {
+        Text(
+            text = stringResource(R.string.artist_detail_urls_title),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+    }
+    items(urls, key = { it }) { url ->
+        Text(
+            text = url,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.primary,
+            textDecoration = TextDecoration.Underline,
+            modifier = Modifier.clickable { onOpenUrl(url) }
+        )
+    }
+}
 
-        if (artist.urls.isNotEmpty()) {
-            item {
-                Text(
-                    text = stringResource(R.string.artist_detail_urls_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-            items(artist.urls, key = { it }) { url ->
-                Text(
-                    text = url,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    textDecoration = TextDecoration.Underline,
-                    modifier = Modifier.clickable {
-                        uriHandler.openUri(url)
-                    }
-                )
-            }
-        }
+private fun LazyListScope.artistNameVariationsSection(
+    artist: ArtistDetail
+) {
+    if (artist.nameVariations.isEmpty()) return
+    item {
+        ArtistInfoCard(
+            title = stringResource(R.string.artist_detail_name_variations_title),
+            value = artist.nameVariations.joinToString(separator = ", ")
+        )
+    }
+}
 
-        if (artist.nameVariations.isNotEmpty()) {
-            item {
-                ArtistInfoCard(
-                    title = stringResource(R.string.artist_detail_name_variations_title),
-                    value = artist.nameVariations.joinToString(separator = ", ")
-                )
+private fun LazyListScope.artistReferenceRowSection(
+    titleRes: Int,
+    references: List<Pair<String, Pair<String, String?>>>
+) {
+    if (references.isEmpty()) return
+    item {
+        Text(
+            text = stringResource(titleRes),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+    }
+    item {
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(vertical = 4.dp)
+        ) {
+            items(
+                items = references,
+                key = { (key, _) -> key }
+            ) { (_, content) ->
+                ArtistReferenceCard(content.first, content.second)
             }
-        }
-
-        if (artist.aliases.isNotEmpty()) {
-            item {
-                Text(
-                    text = stringResource(R.string.artist_detail_aliases_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-            item {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(vertical = 4.dp)
-                ) {
-                    items(artist.aliases, key = { alias -> "${alias.id}_${alias.name}" }) {
-                        ArtistReferenceCard(it.name, it.thumbnailUrl)
-                    }
-                }
-            }
-        }
-
-        if (artist.groups.isNotEmpty()) {
-            item {
-                Text(
-                    text = stringResource(R.string.artist_detail_groups_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-            item {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(vertical = 4.dp)
-                ) {
-                    items(artist.groups, key = { group -> "${group.id}_${group.name}" }) {
-                        ArtistReferenceCard(it.name, it.thumbnailUrl)
-                    }
-                }
-            }
-        }
-
-        if (artist.members.isNotEmpty()) {
-            item {
-                Text(
-                    text = stringResource(R.string.artist_detail_members_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-            item {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(vertical = 4.dp)
-                ) {
-                    items(artist.members, key = { member -> "${member.id}_${member.name}" }) {
-                        ArtistReferenceCard(it.name, it.thumbnailUrl)
-                    }
-                }
-            }
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }

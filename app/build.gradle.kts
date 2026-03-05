@@ -15,6 +15,7 @@ plugins {
     alias(libs.plugins.ksp.plugin)
     alias(libs.plugins.hilt.plugin)
     alias(libs.plugins.ktlint.plugin)
+    alias(libs.plugins.detekt.plugin)
 }
 
 val discogsBaseUrl: String = localProperties.getProperty("DISCOGS_API_BASE_URL", "")
@@ -104,4 +105,11 @@ dependencies {
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    ignoreFailures = true
+    allRules = false
+    config.setFrom("$rootDir/config/detekt/detekt.yml")
 }

@@ -41,7 +41,7 @@ fun ArtistListItem(
     ) {
         Column{
             Surface(
-                modifier = Modifier.height(150.dp)
+                modifier = Modifier.height(200.dp)
                     .fillMaxWidth()
                     .shimmer(
                         isLoading = isLoading,
@@ -51,7 +51,7 @@ fun ArtistListItem(
             ) {
                 AsyncImage(
                     modifier = imageModifier
-                        .height(150.dp)
+                        .height(200.dp)
                         .fillMaxWidth(),
                     model = thumbnail,
                     contentDescription = name,

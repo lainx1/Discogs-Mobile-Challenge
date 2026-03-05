@@ -71,80 +71,124 @@ fun SharedTransitionScope.SearchArtistScreen(
     Scaffold(
         modifier = modifier.fillMaxSize()
     ) { paddingValues ->
-        ConstraintLayout(
+        SearchArtistBody(
+            state = state,
+            artists = artists,
+            animatedVisibilityScope = animatedVisibilityScope,
+            paddingValues = paddingValues,
+            onQueryChange = { viewModel.onEvent(SearchArtistScreenEvent.OnQueryChange(it)) },
+            onClearQuery = { viewModel.onEvent(SearchArtistScreenEvent.OnQueryChange("")) },
+            onNavigateToDetail = { id ->
+                viewModel.onEvent(SearchArtistScreenEvent.OnNavigateToDetail(id))
+            }
+        )
+    }
+}
+
+@Composable
+private fun SharedTransitionScope.SearchArtistBody(
+    state: SearchArtistState,
+    artists: LazyPagingItems<Artist>,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    paddingValues: androidx.compose.foundation.layout.PaddingValues,
+    onQueryChange: (String) -> Unit,
+    onClearQuery: () -> Unit,
+    onNavigateToDetail: (Int) -> Unit
+) {
+    ConstraintLayout(
+        modifier = Modifier
+            .padding(paddingValues)
+            .fillMaxSize()
+            .imePadding()
+    ) {
+        val (searchBar, resultContainer) = createRefs()
+
+        SearchBar(
             modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .imePadding()
-        ) {
-            val (searchBar, resultContainer) = createRefs()
-
-            SearchBar(
-                modifier = Modifier
-                    .constrainAs(searchBar) {
-                        top.linkTo(parent.top)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                        width = Dimension.fillToConstraints
-                    }
-                    .padding(horizontal = 8.dp),
-                query = state.query,
-                enabled = state.searchBarEnabled,
-                onQueryChange = {
-                    viewModel.onEvent(SearchArtistScreenEvent.OnQueryChange(it))
+                .constrainAs(searchBar) {
+                    top.linkTo(parent.top)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    width = Dimension.fillToConstraints
                 }
-            )
+                .padding(horizontal = 8.dp),
+            query = state.query,
+            enabled = state.searchBarEnabled,
+            onQueryChange = onQueryChange
+        )
 
-            Box(
-                contentAlignment = state.resultsContainerAlignment,
-                modifier = Modifier
-                    .constrainAs(resultContainer) {
-                        top.linkTo(searchBar.bottom, margin = 8.dp)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                        bottom.linkTo(parent.bottom)
-                        height = Dimension.fillToConstraints
-                        width = Dimension.fillToConstraints
-                    }
-            ){
-                when(state.state){
-                    SearchArtistScreenState.Idle -> {
-                        Text(
-                            text = stringResource(R.string.main_screen_idle_state_text),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                    SearchArtistScreenState.Loading -> {
-                        CircularProgressIndicator()
-                    }
-                    SearchArtistScreenState.Success -> {
-                        SearchArtistSuccessContent(
-                            state = state,
-                            artists = artists,
-                            animatedVisibilityScope = animatedVisibilityScope,
-                            onNavigateToDetail = { id ->
-                                viewModel.onEvent(SearchArtistScreenEvent.OnNavigateToDetail(id))
-                            }
-                        )
-                    }
-                    is SearchArtistScreenState.Error -> {
-                        Text(
-                            text = state.state.message.asString(),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                        AlertDialog(
-                            onDismissRequest = { viewModel.onEvent(SearchArtistScreenEvent.OnQueryChange("")) },
-                            text = state.state.message.asString(),
-                            confirmationText = stringResource(R.string.alert_dialog_confirmation_text),
-                            icon = Icons.Filled.Error
-                        )
-                    }
-                }
+        SearchArtistResultContainer(
+            state = state,
+            artists = artists,
+            animatedVisibilityScope = animatedVisibilityScope,
+            onClearQuery = onClearQuery,
+            onNavigateToDetail = onNavigateToDetail,
+            modifier = Modifier.constrainAs(resultContainer) {
+                top.linkTo(searchBar.bottom, margin = 8.dp)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                bottom.linkTo(parent.bottom)
+                height = Dimension.fillToConstraints
+                width = Dimension.fillToConstraints
+            }
+        )
+    }
+}
+
+@Composable
+private fun SharedTransitionScope.SearchArtistResultContainer(
+    state: SearchArtistState,
+    artists: LazyPagingItems<Artist>,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    onClearQuery: () -> Unit,
+    onNavigateToDetail: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        contentAlignment = state.resultsContainerAlignment,
+        modifier = modifier
+    ) {
+        when (state.state) {
+            SearchArtistScreenState.Idle -> SearchArtistIdleContent()
+            SearchArtistScreenState.Loading -> CircularProgressIndicator()
+            SearchArtistScreenState.Success ->
+                SearchArtistSuccessContent(
+                    state = state,
+                    artists = artists,
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    onNavigateToDetail = onNavigateToDetail
+                )
+            is SearchArtistScreenState.Error -> {
+                SearchArtistErrorText(message = state.state.message.asString())
+                AlertDialog(
+                    onDismissRequest = onClearQuery,
+                    text = state.state.message.asString(),
+                    confirmationText = stringResource(R.string.alert_dialog_confirmation_text),
+                    icon = Icons.Filled.Error
+                )
             }
         }
     }
+}
+
+@Composable
+private fun SearchArtistIdleContent() {
+    Text(
+        text = stringResource(R.string.main_screen_idle_state_text),
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onSurface
+    )
+}
+
+@Composable
+private fun SearchArtistErrorText(
+    message: String
+) {
+    Text(
+        text = message,
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.error
+    )
 }
 
 @Composable
@@ -156,76 +200,92 @@ private fun SharedTransitionScope.SearchArtistSuccessContent(
 ) {
     val loadState = artists.loadState
     when (loadState.refresh) {
-        is LoadState.Loading if artists.itemCount == 0 -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+        is LoadState.Loading if artists.itemCount == 0 -> SearchArtistLoadingOrEmpty(isLoading = true)
+        is LoadState.NotLoading if artists.itemCount == 0 -> SearchArtistLoadingOrEmpty(isLoading = false)
+        else -> SearchArtistGridContent(
+            state = state,
+            artists = artists,
+            animatedVisibilityScope = animatedVisibilityScope,
+            onNavigateToDetail = onNavigateToDetail
+        )
+    }
+}
+
+@Composable
+private fun SearchArtistLoadingOrEmpty(
+    isLoading: Boolean
+) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator()
+        } else {
+            Text(
+                text = stringResource(R.string.main_screen_empty_state_text),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
-        is LoadState.NotLoading if artists.itemCount == 0 -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.main_screen_empty_state_text),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface
+    }
+}
+
+@Composable
+private fun SharedTransitionScope.SearchArtistGridContent(
+    state: SearchArtistState,
+    artists: LazyPagingItems<Artist>,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    onNavigateToDetail: (Int) -> Unit
+) {
+    val loadState = artists.loadState
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 120.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        items(
+            count = artists.itemCount,
+            key = { index ->
+                val artist = artists.peek(index)
+                artist?.let { "artist_${it.id}" } ?: "placeholder_$index"
+            },
+            contentType = artists.itemContentType { "Artist" }
+        ) { index ->
+            artists[index]?.let { artist ->
+                ArtistListItem(
+                    id = artist.id,
+                    name = artist.name,
+                    thumbnail = artist.thumbnail,
+                    imageModifier = Modifier.sharedElement(
+                        sharedContentState = rememberSharedContentState(
+                            key = "artist_image_${artist.id}"
+                        ),
+                        animatedVisibilityScope = animatedVisibilityScope
+                    ),
+                    nameModifier = Modifier.sharedElement(
+                        sharedContentState = rememberSharedContentState(
+                            key = "artist_name_${artist.id}"
+                        ),
+                        animatedVisibilityScope = animatedVisibilityScope
+                    ),
+                    onClick = onNavigateToDetail
                 )
             }
         }
-        else -> {
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 120.dp),
-                verticalArrangement = Arrangement.spacedBy(5.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                items(
-                    count = artists.itemCount,
-                    key = { index ->
-                        val artist = artists.peek(index)
-                        artist?.let { "artist_${it.id}" } ?: "placeholder_$index"
-                    },
-                    contentType = artists.itemContentType { "Artist" }
-                ) { index ->
-                    artists[index]?.let { artist ->
-                        ArtistListItem(
-                            id = artist.id,
-                            name = artist.name,
-                            thumbnail = artist.thumbnail,
-                            imageModifier = Modifier.sharedElement(
-                                sharedContentState = rememberSharedContentState(
-                                    key = "artist_image_${artist.id}"
-                                ),
-                                animatedVisibilityScope = animatedVisibilityScope
-                            ),
-                            nameModifier = Modifier.sharedElement(
-                                sharedContentState = rememberSharedContentState(
-                                    key = "artist_name_${artist.id}"
-                                ),
-                                animatedVisibilityScope = animatedVisibilityScope
-                            ),
-                            onClick = onNavigateToDetail
-                        )
-                    }
-                }
 
-                if (loadState.append is LoadState.Loading) {
-                    items(
-                        items = state.loadingArtists,
-                        key = { "shimmer_${it.id}" }
-                    ) { shimmer ->
-                        ArtistListItem(
-                            id = shimmer.id,
-                            name = shimmer.name,
-                            thumbnail = shimmer.thumbnail,
-                            isLoading = true,
-                            onClick = {}
-                        )
-                    }
-                }
+        if (loadState.append is LoadState.Loading) {
+            items(
+                items = state.loadingArtists,
+                key = { "shimmer_${it.id}" }
+            ) { shimmer ->
+                ArtistListItem(
+                    id = shimmer.id,
+                    name = shimmer.name,
+                    thumbnail = shimmer.thumbnail,
+                    isLoading = true,
+                    onClick = {}
+                )
             }
         }
     }

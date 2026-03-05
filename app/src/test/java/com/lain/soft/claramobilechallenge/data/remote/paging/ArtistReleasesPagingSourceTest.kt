@@ -21,82 +21,22 @@ import org.junit.Test
 class ArtistReleasesPagingSourceTest {
 
     private val discogsApi = mockk<DiscogsApi>()
+    private val artistName = "ABBA"
+    private val defaultFilters = ArtistReleaseFilters(year = 1999, genre = "Rock", label = "EMI")
 
     @Test
     fun load_usesPerPage30AndCalculatePrevNextKeys() = runTest {
-        val filters = ArtistReleaseFilters(year = 1999, genre = "Rock", label = "EMI")
-        val response = SearchReleasesResponseDto(
-            pagination = PaginationDto(
-                items = 100,
-                page = 2,
-                pages = 4,
-                perPage = 30,
-                urls = UrlsDto(next = "next", prev = "prev")
-            ),
-            results = listOf(
-                ReleaseSearchResultDto(
-                    id = 11,
-                    title = "A",
-                    year = "2001",
-                    type = "release",
-                    format = listOf("LP"),
-                    label = listOf("EMI"),
-                    genre = listOf("Rock"),
-                    thumb = null,
-                    coverImage = null
-                ),
-                ReleaseSearchResultDto(
-                    id = 12,
-                    title = "B",
-                    year = "2000",
-                    type = "release",
-                    format = listOf("LP"),
-                    label = listOf("EMI"),
-                    genre = listOf("Rock"),
-                    thumb = null,
-                    coverImage = null
-                )
-            )
-        )
-        coEvery {
-            discogsApi.searchReleases(
-                artist = "ABBA",
-                year = filters.year,
-                genre = filters.genre,
-                label = filters.label,
-                perPage = Constants.PAGING_ITEMS_PER_PAGE,
-                page = 2
-            )
-        } returns response
+        val expectedPage = 2
+        val pagingSource = createPagingSource(defaultFilters)
+        stubSearchReleasesSuccess(filters = defaultFilters, page = expectedPage)
 
-        val pagingSource = ArtistReleasesPagingSource(
-            artistName = "ABBA",
-            filters = filters,
-            discogsApi = discogsApi
-        )
-
-        val result = pagingSource.load(
-            PagingSource.LoadParams.Append(
-                key = 2,
-                loadSize = 30,
-                placeholdersEnabled = false
-            )
-        )
+        val result = pagingSource.load(createAppendParams(key = expectedPage))
 
         assertTrue(result is PagingSource.LoadResult.Page)
         val page = result as PagingSource.LoadResult.Page
         assertEquals(1, page.prevKey)
         assertEquals(3, page.nextKey)
-        coVerify(exactly = 1) {
-            discogsApi.searchReleases(
-                artist = "ABBA",
-                year = 1999,
-                genre = "Rock",
-                label = "EMI",
-                perPage = 30,
-                page = 2
-            )
-        }
+        verifySearchReleasesCalled(filters = defaultFilters, page = expectedPage)
     }
 
     @Test
@@ -108,7 +48,7 @@ class ArtistReleasesPagingSourceTest {
         } throws error
 
         val pagingSource = ArtistReleasesPagingSource(
-            artistName = "ABBA",
+            artistName = artistName,
             filters = filters,
             discogsApi = discogsApi
         )
@@ -124,4 +64,82 @@ class ArtistReleasesPagingSourceTest {
         assertTrue(result is PagingSource.LoadResult.Error)
         assertEquals(error, (result as PagingSource.LoadResult.Error).throwable)
     }
+
+    private fun createPagingSource(filters: ArtistReleaseFilters): ArtistReleasesPagingSource =
+        ArtistReleasesPagingSource(
+            artistName = artistName,
+            filters = filters,
+            discogsApi = discogsApi
+        )
+
+    private fun createAppendParams(key: Int): PagingSource.LoadParams.Append<Int> =
+        PagingSource.LoadParams.Append(
+            key = key,
+            loadSize = Constants.PAGING_ITEMS_PER_PAGE,
+            placeholdersEnabled = false
+        )
+
+    private fun stubSearchReleasesSuccess(
+        filters: ArtistReleaseFilters,
+        page: Int
+    ) {
+        coEvery {
+            discogsApi.searchReleases(
+                artist = artistName,
+                year = filters.year,
+                genre = filters.genre,
+                label = filters.label,
+                perPage = Constants.PAGING_ITEMS_PER_PAGE,
+                page = page
+            )
+        } returns createSearchReleasesResponse(page = page)
+    }
+
+    private fun verifySearchReleasesCalled(
+        filters: ArtistReleaseFilters,
+        page: Int
+    ) {
+        coVerify(exactly = 1) {
+            discogsApi.searchReleases(
+                artist = artistName,
+                year = filters.year,
+                genre = filters.genre,
+                label = filters.label,
+                perPage = Constants.PAGING_ITEMS_PER_PAGE,
+                page = page
+            )
+        }
+    }
+
+    private fun createSearchReleasesResponse(page: Int): SearchReleasesResponseDto =
+        SearchReleasesResponseDto(
+            pagination = PaginationDto(
+                items = 100,
+                page = page,
+                pages = 4,
+                perPage = Constants.PAGING_ITEMS_PER_PAGE,
+                urls = UrlsDto(next = "next", prev = "prev")
+            ),
+            results = listOf(
+                createReleaseSearchResultDto(id = 11, title = "A", year = "2001"),
+                createReleaseSearchResultDto(id = 12, title = "B", year = "2000")
+            )
+        )
+
+    private fun createReleaseSearchResultDto(
+        id: Int,
+        title: String,
+        year: String
+    ): ReleaseSearchResultDto =
+        ReleaseSearchResultDto(
+            id = id,
+            title = title,
+            year = year,
+            type = "release",
+            format = listOf("LP"),
+            label = listOf("EMI"),
+            genre = listOf("Rock"),
+            thumb = null,
+            coverImage = null
+        )
 }

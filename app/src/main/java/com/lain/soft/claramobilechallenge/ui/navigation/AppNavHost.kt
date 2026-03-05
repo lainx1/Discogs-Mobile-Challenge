@@ -9,7 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.lain.soft.claramobilechallenge.ui.screen.ArtistDetailScreen
-import com.lain.soft.claramobilechallenge.ui.screen.ArtistReleasesScreen
+import com.lain.soft.claramobilechallenge.ui.screen.artistreleases.ArtistReleasesScreen
 import com.lain.soft.claramobilechallenge.ui.screen.SearchArtistScreen
 
 @OptIn(ExperimentalSharedTransitionApi::class)
