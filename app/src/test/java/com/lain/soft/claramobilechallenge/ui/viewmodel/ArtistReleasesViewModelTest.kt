@@ -8,6 +8,7 @@ import com.lain.soft.claramobilechallenge.domain.model.ArtistRelease
 import com.lain.soft.claramobilechallenge.domain.model.ArtistReleaseFilters
 import com.lain.soft.claramobilechallenge.domain.usecase.GetArtistReleasesUseCase
 import com.lain.soft.claramobilechallenge.ui.mapper.ErrorMessageMapper
+import com.lain.soft.claramobilechallenge.ui.navigation.RouteArgDecoder
 import com.lain.soft.claramobilechallenge.ui.navigation.Routes
 import com.lain.soft.claramobilechallenge.ui.state.ArtistReleasesEvent
 import com.lain.soft.claramobilechallenge.ui.state.ArtistReleasesScreenEffect
@@ -26,11 +27,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(RobolectricTestRunner::class)
 class ArtistReleasesViewModelTest {
 
     @get:Rule
@@ -38,11 +36,15 @@ class ArtistReleasesViewModelTest {
 
     private lateinit var getArtistReleasesUseCase: GetArtistReleasesUseCase
     private lateinit var errorMessageMapper: ErrorMessageMapper
+    private lateinit var routeArgDecoder: RouteArgDecoder
 
     @Before
     fun setup() {
         getArtistReleasesUseCase = mockk()
         errorMessageMapper = mockk()
+        routeArgDecoder = RouteArgDecoder { value ->
+            java.net.URLDecoder.decode(value, java.nio.charset.StandardCharsets.UTF_8)
+        }
     }
 
     @Test
@@ -125,6 +127,7 @@ class ArtistReleasesViewModelTest {
         return ArtistReleasesViewModel(
             getArtistReleasesUseCase = getArtistReleasesUseCase,
             errorMessageMapper = errorMessageMapper,
+            routeArgDecoder = routeArgDecoder,
             savedStateHandle = SavedStateHandle(
                 mapOf(Routes.ARTIST_NAME to "ABBA")
             )

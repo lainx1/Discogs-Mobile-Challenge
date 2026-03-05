@@ -1,12 +1,12 @@
 package com.lain.soft.claramobilechallenge.ui.viewmodel
 
-import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.lain.soft.claramobilechallenge.domain.model.ArtistReleaseFilters
 import com.lain.soft.claramobilechallenge.domain.usecase.GetArtistReleasesUseCase
 import com.lain.soft.claramobilechallenge.ui.mapper.ErrorMessageMapper
+import com.lain.soft.claramobilechallenge.ui.navigation.RouteArgDecoder
 import com.lain.soft.claramobilechallenge.ui.navigation.Routes
 import com.lain.soft.claramobilechallenge.ui.state.ArtistReleasesEvent
 import com.lain.soft.claramobilechallenge.ui.state.ArtistReleasesScreenEffect
@@ -23,6 +23,7 @@ import javax.inject.Inject
 class ArtistReleasesViewModel @Inject constructor(
     private val getArtistReleasesUseCase: GetArtistReleasesUseCase,
     private val errorMessageMapper: ErrorMessageMapper,
+    private val routeArgDecoder: RouteArgDecoder,
     savedStateHandle: SavedStateHandle
 ) : StateMachineViewModel<ArtistReleasesState>(
     initialState = ArtistReleasesState()
@@ -31,9 +32,9 @@ class ArtistReleasesViewModel @Inject constructor(
     private val _effect = MutableSharedFlow<ArtistReleasesScreenEffect>()
     val effect: SharedFlow<ArtistReleasesScreenEffect> = _effect
 
-    private val artistName: String = Uri.decode(
-        checkNotNull(savedStateHandle.get<String>(Routes.ARTIST_NAME))
-    ).trim()
+    private val artistName: String = routeArgDecoder
+        .decode(checkNotNull(savedStateHandle.get<String>(Routes.ARTIST_NAME)))
+        .trim()
     private var loadReleasesJob: Job? = null
 
     init {

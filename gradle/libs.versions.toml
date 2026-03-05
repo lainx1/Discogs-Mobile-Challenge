@@ -25,7 +25,6 @@ coilCompose = "3.3.0"
 kotlinxCoroutinesTest = "1.10.2"
 turbine = "1.2.1"
 mockk = "1.14.6"
-robolectric = "4.16"
 detekt = "1.23.8"
 
 [libraries]
@@ -63,7 +62,6 @@ coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
-robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
